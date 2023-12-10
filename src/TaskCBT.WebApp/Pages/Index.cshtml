@@ -1,0 +1,26 @@
+﻿@page
+@using TaskCBT.WebApp
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <br />
+    <a href="/Any">ANY</a>
+    <a href="@Variable.Raw.UrlApi/test/ads">API</a>
+</div>
+
+<script type="text/javascript" src="~/js/jwt.js"></script>
+<script type="text/javascript">
+    (async function () {
+        console.log("BEGIN");
+        initFetchJwt("@Variable.Raw.UrlApi/auth/refresh");
+        console.log("INIT");
+        let response = await fetch("@Variable.Raw.UrlApi/tmp", {
+            jwt: 'local'
+        });
+        console.log("Response: ", response);
+        let json = await response.json();
+        console.log("Response JSON body: ", json);
+    })();
+</script>
+
