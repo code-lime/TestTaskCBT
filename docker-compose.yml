@@ -1,15 +1,109 @@
 version: '3.4'
 
 services:
-  taskcbt.webapp:
-    image: ${DOCKER_REGISTRY-}taskcbtwebapp
-    build:
-      context: .
-      dockerfile: src/TaskCBT.WebApp/Dockerfile
-
   taskcbt:
     image: ${DOCKER_REGISTRY-}taskcbt
+    container_name: TaskCBT
+    networks:
+      - mariadb
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    links: 
+      - mariadb
     build:
       context: .
       dockerfile: src/TaskCBT/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      
+      - Serilog__MinimumLevel__Default=${LOGGING_LEVEL}
+      
+      - DataBase__Host=mariadb
+      - DataBase__Port=3306
+      - DataBase__User=${MARIADB_USERNAME}
+      - DataBase__Password=${MARIADB_PASSWORD}
+      - DataBase__Database=${MARIADB_DATABASE}
+      
+      - JWT__Issuer=${JWT_ISSUER}
+      - JWT__Audience=${JWT_AUDIENCE}
+      - JWT__Key=${JWT_KEY}
+      
+      - Secure__Pepper=${SECURE_PEPPER}
+      - Secure__Iterations=${SECURE_ITERATIONS}
+      
+      - Email__Name=${EMAIL_NAME}
+      - Email__Email=${EMAIL_EMAIL}
+      - Email__Password=${EMAIL_PASSWORD}
+      - Email__ConfirmMessage__Subject=${EMAIL_CONFIRMMESSAGE_SUBJECT}
+      - Email__ConfirmMessage__Body=${EMAIL_CONFIRMMESSAGE_BODY}
+    ports:
+      - ${API_PORT_HTTP}:8080
+      - ${API_PORT_HTTPS}:8081
+    restart: always
+  mariadb:
+    image: mariadb:latest
+    hostname: mariadb
+    container_name: MariaDB
+    environment:
+      MYSQL_DATABASE: ${MARIADB_DATABASE}
+      MYSQL_USER: ${MARIADB_USERNAME}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    volumes:
+      - ./etc/db:/var/lib/mysql
+    networks:
+      - mariadb
+    ports:
+      - ${MARIADB_PORT}:3306
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 30s
+      start_interval: 10s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: always
 
+  taskcbt.webapp:
+    image: ${DOCKER_REGISTRY-}taskcbtwebapp
+    container_name: TaskCBT.WebApp
+    build:
+      context: .
+      dockerfile: src/TaskCBT.WebApp/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+
+      - Variable__UrlApi=${API_URL}
+    ports:
+      - ${WEB_PORT_HTTP}:8080
+      - ${WEB_PORT_HTTPS}:8081
+networks:
+  mariadb:
+    driver: bridge
+
+# MARIADB_DATABASE
+# MARIADB_USERNAME
+# MARIADB_PASSWORD
+# MARIADB_ROOT_PASSWORD
+# MARIADB_PORT
+# LOGGING_LEVEL
+# JWT_ISSUER
+# JWT_AUDIENCE
+# JWT_KEY
+# SECURE_PEPPER
+# SECURE_ITERATIONS
+# EMAIL_NAME
+# EMAIL_EMAIL
+# EMAIL_PASSWORD
+# EMAIL_CONFIRMMESSAGE_SUBJECT
+# EMAIL_CONFIRMMESSAGE_BODY
+# API_URL
+# API_PORT_HTTP
+# API_PORT_HTTPS
+# WEB_PORT_HTTP
+# WEB_PORT_HTTPS

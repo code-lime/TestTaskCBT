@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 tmp.txt
 /.env
+/etc/db
