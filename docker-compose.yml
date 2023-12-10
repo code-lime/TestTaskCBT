@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  taskcbt.webapp:
+    image: ${DOCKER_REGISTRY-}taskcbtwebapp
+    build:
+      context: .
+      dockerfile: src/TaskCBT.WebApp/Dockerfile
+
+  taskcbt:
+    image: ${DOCKER_REGISTRY-}taskcbt
+    build:
+      context: .
+      dockerfile: src/TaskCBT/Dockerfile
+

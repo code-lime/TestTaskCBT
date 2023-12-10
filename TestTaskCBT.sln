@@ -4,6 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.8.34219.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{EBAE5FA0-81C2-4FBE-A8F6-53D71780CB98}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{93BBADCF-8A87-4F96-B787-EA1374BF71A7}"
 EndProject
@@ -15,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskCBT.Domain", "src\TaskC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskCBT.Infrastructure", "src\TaskCBT.Infrastructure\TaskCBT.Infrastructure.csproj", "{7DCE0D02-829B-4425-908C-15A91A777F02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskCBT.WebApp", "src\TaskCBT.WebApp\TaskCBT.WebApp.csproj", "{398B96A7-DA7C-42EC-A150-AE0531A523AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskCBT.WebApp", "src\TaskCBT.WebApp\TaskCBT.WebApp.csproj", "{398B96A7-DA7C-42EC-A150-AE0531A523AE}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{116B036A-CBCA-4BFA-814B-D07AD25CEC2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +49,10 @@ Global
 		{398B96A7-DA7C-42EC-A150-AE0531A523AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{398B96A7-DA7C-42EC-A150-AE0531A523AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{398B96A7-DA7C-42EC-A150-AE0531A523AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{116B036A-CBCA-4BFA-814B-D07AD25CEC2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{116B036A-CBCA-4BFA-814B-D07AD25CEC2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{116B036A-CBCA-4BFA-814B-D07AD25CEC2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{116B036A-CBCA-4BFA-814B-D07AD25CEC2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
