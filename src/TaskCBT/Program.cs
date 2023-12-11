@@ -17,7 +17,7 @@ builder.Services.AddSingleton(Log.Logger);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(v => v.SupportNonNullableReferenceTypes());
 
 builder.Services.AddServerServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
