@@ -52,8 +52,8 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
         if (user is null) return null;
         Event _event = MapTo(eventData);
         user.OwnerEvents.Add(_event);
-        await transaction.CommitAsync(cancellationToken);
         await context.DbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return _event.Id;
     }
 
@@ -95,8 +95,8 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
         Event? _event = await context.Events.FindAsync([eventData.Id], cancellationToken);
         if (_event is null || _event.OwnerId != userId) return false;
         SetTo(_event, eventData);
-        await transaction.CommitAsync(cancellationToken);
         await context.DbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return true;
     }
 
@@ -119,8 +119,8 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
         }
         else if (subscriber is not null && !join)
             _event.Subscribers.Remove(subscriber);
-        await transaction.CommitAsync(cancellationToken);
         await context.DbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return EventJoinStatus.Success;
     }
 

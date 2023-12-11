@@ -80,6 +80,7 @@ public class AuthRepository(
         AuthData authData = await CreateAuthDataAsync(refresh.Auth, cancellationToken);
         context.RefreshTokens.Remove(refresh);
         await context.DbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return authData;
     }
 
