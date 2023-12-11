@@ -6,7 +6,8 @@ namespace TaskCBT.Application.Data.Queries;
 public record RegisterByEmailQuery(string Email, string Password) : IRequest<bool>;
 public record RegisterConfirmQuery(bool Confirm) : IRequest<bool>;
 
-public class RegisterQueryHandler(IAuthRepository authRepository) :
+public class RegisterQueryHandler(
+    IAuthRepository authRepository) :
     IRequestHandler<RegisterByEmailQuery, bool>,
     IRequestHandler<RegisterConfirmQuery, bool>
 {

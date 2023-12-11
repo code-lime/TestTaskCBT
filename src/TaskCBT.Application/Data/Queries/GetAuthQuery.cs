@@ -7,7 +7,8 @@ namespace TaskCBT.Application.Data.Queries;
 public record GetAuthByEmailQuery(string Email, string Password) : IRequest<AuthData?>;
 public record GetAuthByRefreshTokenQuery(string RefreshToken) : IRequest<AuthData?>;
 
-public class GetAuthQueryHandler(IAuthRepository authRepository) :
+public class GetAuthQueryHandler(
+    IAuthRepository authRepository) :
     IRequestHandler<GetAuthByEmailQuery, AuthData?>,
     IRequestHandler<GetAuthByRefreshTokenQuery, AuthData?>
 {
