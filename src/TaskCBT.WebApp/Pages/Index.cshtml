@@ -6,7 +6,7 @@
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
     <br />
     <a href="/Any">ANY</a>
-    <a href="@Variable.Raw.UrlApi/test/ads">API</a>
+    <a href="@Variable.Raw.UrlApi/test/ads">APAAI</a>
 </div>
 
 <script type="text/javascript" src="~/js/jwt.js"></script>
@@ -14,10 +14,11 @@
     (async function () {
         console.log("BEGIN");
         initFetchJwt("@Variable.Raw.UrlApi/auth/refresh");
-        console.log("INIT");
-        let response = await fetch("@Variable.Raw.UrlApi/tmp", {
+        console.log("INIT", getParsedCurrentJwt());
+        let response = await fetch("@Variable.Raw.UrlApi/email?email=demn2001@gmail.com&password=123444");
+        /*, {
             jwt: 'local'
-        });
+        } */
         console.log("Response: ", response);
         let json = await response.json();
         console.log("Response JSON body: ", json);
