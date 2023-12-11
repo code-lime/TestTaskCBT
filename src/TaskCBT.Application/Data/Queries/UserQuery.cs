@@ -22,7 +22,7 @@ public class UserQueryHandler(
     public async Task<bool> Handle(ModifyUserByCurrentQuery request, CancellationToken cancellationToken)
         => await userRepository.ModifyUserInfoByCurrentAsync(request.UserData, cancellationToken);
     public async Task<UserData?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
-        => request.UserId == 0 
+        => request.UserId == 0
         ? await userRepository.GetUserInfoByCurrentAsync(cancellationToken)
         : await userRepository.GetUserInfoByIdAsync(request.UserId, cancellationToken);
 }
