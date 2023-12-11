@@ -10,7 +10,7 @@ namespace TaskCBT.Controllers;
 [Route("users")]
 public class UserController(IMediator mediator) : ControllerBase
 {
-    [HttpGet("create")]
+    [HttpPost("create")]
     [Authorize(Policy = "create")]
     [ProducesResponseType(typeof(SuccessResponse<AuthData>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
@@ -33,7 +33,7 @@ public class UserController(IMediator mediator) : ControllerBase
             ? Ok(new SuccessResponse<UserData> { Response = userData })
             : NotFound(new ErrorResponse { Error = "user not found" });
 
-    [HttpGet("modify")]
+    [HttpPost("modify")]
     [Authorize(Policy = "user")]
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
