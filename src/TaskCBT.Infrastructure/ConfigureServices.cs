@@ -15,7 +15,7 @@ public static class ConfigureServices
         IConfiguration configuration)
     {
         IConfigurationSection database = configuration.GetRequiredSection("DataBase");
-        if (database.Get<string>() is not string connectionString)
+        if (database.Value is not string connectionString)
         {
             MySqlConnectionStringBuilder builder = [];
             foreach (IConfigurationSection child in database.GetChildren())
@@ -25,6 +25,7 @@ public static class ConfigureServices
         return services
             .AddDbContext<IContext, ApplicationDbContext>(options => options
                 .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+                .UseLazyLoadingProxies()
                 .UseSnakeCaseNamingConvention())
 
             .AddScoped<IEventRepository, EventRepository>()

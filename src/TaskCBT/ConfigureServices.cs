@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Reflection;
 using TaskCBT.Application.Common.Interfaces;
 using TaskCBT.Infrastructure.Common.Configs;
 using TaskCBT.Services;
@@ -13,6 +14,8 @@ public static class ConfigureServices
     public static IServiceCollection AddServerServices(this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddMediatR(v => v.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+        services.AddCors();
         services.AddControllers();
         services.AddSingleton(Log.Logger);
 
