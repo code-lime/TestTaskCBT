@@ -18,5 +18,5 @@ public class UserController(IMediator mediator) : ControllerBase
         [FromQuery(Name = "lastName")] string? lastName = null)
         => await mediator.Send(new CreateUserQuery(firstName, lastName), cancellationToken) is AuthData authData
             ? new SuccessResponse<AuthData> { Response = authData }
-            : new ErrorResponse { Error = "auth error" };
+            : new ErrorResponse { Error = "auth error or user exist" };
 }
