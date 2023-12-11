@@ -9,6 +9,6 @@ public class Auth
     public string Data { get; set; } = null!;
     public string Salt { get; set; } = null!;
 
-    public User? User { get; set; }
-    public ICollection<RefreshToken> RefreshTokens { get; } = [];
+    public virtual User? User { get; set; }
+    public virtual ICollection<RefreshToken> RefreshTokens { get; } = [];
 }

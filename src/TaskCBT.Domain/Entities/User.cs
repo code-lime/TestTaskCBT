@@ -1,4 +1,6 @@
-﻿namespace TaskCBT.Domain.Entities;
+﻿using System.Collections.Immutable;
+
+namespace TaskCBT.Domain.Entities;
 
 public class User
 {
@@ -6,11 +8,11 @@ public class User
     public string FirstName { get; set; } = null!;
     public string? LastName { get; set; }
 
-    public Dictionary<string, string> Fields { get; set; } = [];
+    public ImmutableDictionary<string, string> Fields { get; set; } = ImmutableDictionary<string, string>.Empty;
 
-    public int? AuthId { get; set; }
-    public Auth? Auth { get; set; }
+    public int AuthId { get; set; }
+    public virtual Auth Auth { get; set; } = null!;
 
-    public ICollection<Event> OwnerEvents { get; } = [];
-    public ICollection<EventSubscriber> Subscriptions { get; } = [];
+    public virtual ICollection<Event> OwnerEvents { get; } = [];
+    public virtual ICollection<EventSubscriber> Subscriptions { get; } = [];
 }

@@ -1,4 +1,6 @@
-﻿namespace TaskCBT.Domain.Entities;
+﻿using System.Collections.Immutable;
+
+namespace TaskCBT.Domain.Entities;
 
 public class Event
 {
@@ -8,9 +10,9 @@ public class Event
     public DateTime Time { get; set; }
 
     public int OwnerId { get; set; }
-    public User Owner { get; set; } = null!;
+    public virtual User Owner { get; set; } = null!;
 
-    public Dictionary<string, string> Fields { get; set; } = [];
+    public ImmutableDictionary<string, string> Fields { get; set; } = ImmutableDictionary<string, string>.Empty;
 
-    public ICollection<EventSubscriber> Subscribers { get; } = [];
+    public virtual ICollection<EventSubscriber> Subscribers { get; } = [];
 }
