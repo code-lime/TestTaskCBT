@@ -68,6 +68,7 @@ public partial class ApplicationDbContext : DbContext, IContext
                 entity.Property(e => e.Title).HasMaxLength(100);
                 entity.Property(e => e.Type).HasMaxLength(100);
                 entity.Property(e => e.Time);
+                entity.Property(e => e.SubscribersLimit);
                 entity.Property(e => e.Fields)
                     .HasJsonValueConversion();
 

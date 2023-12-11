@@ -8,6 +8,7 @@ public class Event
     public string Title { get; set; } = null!;
     public string Type { get; set; } = null!;
     public DateTime Time { get; set; }
+    public int? SubscribersLimit { get; set; }
 
     public int OwnerId { get; set; }
     public virtual User Owner { get; set; } = null!;

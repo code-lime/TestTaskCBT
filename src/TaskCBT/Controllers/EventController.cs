@@ -36,23 +36,33 @@ public class EventController(IMediator mediator) : ControllerBase
     [Authorize(Policy = "user")]
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> JoinAsync(
         [FromRoute(Name = "id")] int id,
         CancellationToken cancellationToken)
-        => await mediator.Send(new JoinEventByIdByCurrentQuery(id, true), cancellationToken)
-            ? Ok(new SuccessResponse { })
-            : NotFound(new ErrorResponse { Error = "event not found" });
+        => await mediator.Send(new JoinEventByIdByCurrentQuery(id, true), cancellationToken) switch
+        {
+            EventJoinStatus.Success => Ok(new SuccessResponse { }),
+            EventJoinStatus.NotFound => NotFound(new ErrorResponse { Error = "event not found" }),
+            EventJoinStatus.Limit => Conflict(new ErrorResponse { Error = "event subscribtions limited" }),
+            var status => throw new NotSupportedException($"Status '{status}' not supported")
+        };
 
     [HttpPost("{id}/leave")]
     [Authorize(Policy = "user")]
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> LeaveAsync(
         [FromRoute(Name = "id")] int id,
         CancellationToken cancellationToken)
-        => await mediator.Send(new JoinEventByIdByCurrentQuery(id, false), cancellationToken)
-            ? Ok(new SuccessResponse { })
-            : NotFound(new ErrorResponse { Error = "event not found" });
+        => await mediator.Send(new JoinEventByIdByCurrentQuery(id, false), cancellationToken) switch
+        {
+            EventJoinStatus.Success => Ok(new SuccessResponse { }),
+            EventJoinStatus.NotFound => NotFound(new ErrorResponse { Error = "event not found" }),
+            EventJoinStatus.Limit => Conflict(new ErrorResponse { Error = "event subscribtions limited" }),
+            var status => throw new NotSupportedException($"Status '{status}' not supported")
+        };
 
     [HttpGet("{id}/subscribers")]
     [Authorize(Policy = "user")]

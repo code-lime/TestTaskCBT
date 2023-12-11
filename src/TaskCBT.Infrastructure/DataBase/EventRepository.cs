@@ -13,6 +13,7 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
             Title = data.Title,
             Type = data.Type,
             Time = data.Time,
+            SubscribersLimit = data.SubscribersLimit,
             Fields = data.Fields
         };
     public static Event MapTo(EventData data)
@@ -21,6 +22,7 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
             Title = data.Title,
             Type = data.Type,
             Time = data.Time,
+            SubscribersLimit = data.SubscribersLimit,
             Fields = data.Fields
         };
 
@@ -30,6 +32,7 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
         to.Title = from.Title;
         to.Type = from.Type;
         to.Time = from.Time;
+        to.SubscribersLimit = from.SubscribersLimit;
         to.Fields = from.Fields;
     }
     public static void SetTo(Event to, EventData from)
@@ -37,6 +40,7 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
         to.Title = from.Title;
         to.Type = from.Type;
         to.Time = from.Time;
+        to.SubscribersLimit = from.SubscribersLimit;
         to.Fields = from.Fields;
     }
 
@@ -96,24 +100,28 @@ public class EventRepository(ICurrentUser current, IContext context) : IEventRep
         return true;
     }
 
-    public async Task<bool> JoinEventByIdByCurrentAsync(int eventId, bool join, CancellationToken cancellationToken)
+    public async Task<EventJoinStatus> JoinEventByIdByCurrentAsync(int eventId, bool join, CancellationToken cancellationToken)
     {
-        if (current.UserID is not int userId) return false;
+        if (current.UserID is not int userId) return EventJoinStatus.NotFound;
         await using var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken);
         Event? _event = await context.Events.FindAsync([eventId], cancellationToken);
-        if (_event is null) return false;
+        if (_event is null) return EventJoinStatus.NotFound;
         EventSubscriber? subscriber = _event.Subscribers.FirstOrDefault(v => v.UserId == userId);
         if (subscriber is null && join)
+        {
+            if (_event.SubscribersLimit is int limit && _event.Subscribers.Count >= limit)
+                return EventJoinStatus.Limit;
             _event.Subscribers.Add(new EventSubscriber
             {
                 Event = _event,
                 UserId = userId
             });
+        }
         else if (subscriber is not null && !join)
             _event.Subscribers.Remove(subscriber);
         await transaction.CommitAsync(cancellationToken);
         await context.DbContext.SaveChangesAsync(cancellationToken);
-        return true;
+        return EventJoinStatus.Success;
     }
 
     public async Task<IEnumerable<UserData>> GetEventSubscribersByIdAsync(int eventId, CancellationToken cancellationToken) 

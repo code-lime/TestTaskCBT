@@ -16,7 +16,7 @@ public enum UserTypeQuery
 public record GetEventsByUserIdQuery(int UserId, UserTypeQuery UserType) : IRequest<IEnumerable<EventData>>;
 public record GetEventsAllQuery : IRequest<IEnumerable<EventData>>;
 
-public record JoinEventByIdByCurrentQuery(int EventId, bool Join) : IRequest<bool>;
+public record JoinEventByIdByCurrentQuery(int EventId, bool Join) : IRequest<EventJoinStatus>;
 public record GetEventSubscribersByIdQuery(int EventId) : IRequest<IEnumerable<UserData>>;
 
 public record GetEventOwnerByIdQuery(int EventId) : IRequest<UserData?>;
@@ -28,7 +28,7 @@ public class EventQueryHandler(
     IRequestHandler<GetEventByIdQuery, EventData?>,
     IRequestHandler<GetEventsByUserIdQuery, IEnumerable<EventData>>,
     IRequestHandler<GetEventsAllQuery, IEnumerable<EventData>>,
-    IRequestHandler<JoinEventByIdByCurrentQuery, bool>,
+    IRequestHandler<JoinEventByIdByCurrentQuery, EventJoinStatus>,
     IRequestHandler<GetEventSubscribersByIdQuery, IEnumerable<UserData>>,
     IRequestHandler<GetEventOwnerByIdQuery, UserData?>
 {
@@ -52,7 +52,7 @@ public class EventQueryHandler(
         };
     public async Task<IEnumerable<EventData>> Handle(GetEventsAllQuery request, CancellationToken cancellationToken)
         => await eventRepository.GetAllEventsAsync(cancellationToken);
-    public async Task<bool> Handle(JoinEventByIdByCurrentQuery request, CancellationToken cancellationToken)
+    public async Task<EventJoinStatus> Handle(JoinEventByIdByCurrentQuery request, CancellationToken cancellationToken)
         => await eventRepository.JoinEventByIdByCurrentAsync(request.EventId, request.Join, cancellationToken);
     public async Task<IEnumerable<UserData>> Handle(GetEventSubscribersByIdQuery request, CancellationToken cancellationToken)
         => await eventRepository.GetEventSubscribersByIdAsync(request.EventId, cancellationToken);
