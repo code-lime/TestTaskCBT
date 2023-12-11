@@ -13,6 +13,15 @@ function getParsedJwt(token) {
         return undefined
     }
 }
+/**
+ * @returns {(object | undefined)}
+ */
+function getParsedCurrentJwt() {
+    let accessToken = localStorage.getItem('accessToken');
+    return accessToken !== null && accessToken !== undefined
+        ? getParsedJwt(accessToken)
+        : undefined;
+}
 function initFetchJwt(refreshApi) {
     const originalFetch = fetch;
     fetch = function () {
