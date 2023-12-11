@@ -48,10 +48,8 @@ public partial class ApplicationDbContext : DbContext, IContext
         modelBuilder
             .Entity<RefreshToken>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.Token).IsUnique();
+                entity.HasKey(e => e.Token);
 
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.Token).HasMaxLength(100);
 
                 entity

@@ -2,8 +2,8 @@
 
 public class RefreshToken
 {
-    public int Id { get; set; }
+    public string Token { get; set; } = null!;
+
     public int AuthId { get; set; }
     public virtual Auth Auth { get; set; } = null!;
-    public string Token { get; set; } = null!;
 }

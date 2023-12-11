@@ -74,8 +74,7 @@ public class AuthRepository(
     public async Task<AuthData?> GetAuthTokensByRefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
         using var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken);
-        RefreshToken? refresh = await context.RefreshTokens
-            .FirstOrDefaultAsync(v => v.Token == refreshToken, cancellationToken: cancellationToken);
+        RefreshToken? refresh = await context.RefreshTokens.FindAsync([refreshToken], cancellationToken);
         if (refresh is null) return null;
         AuthData authData = await CreateAuthDataAsync(refresh.Auth, cancellationToken);
         context.RefreshTokens.Remove(refresh);
