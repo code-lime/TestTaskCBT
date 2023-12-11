@@ -6,6 +6,36 @@ namespace TaskCBT.Infrastructure.DataBase;
 
 public class UserRepository(ICurrentUser current, IContext context) : IUserRepository
 {
+    public static UserData MapTo(User data)
+        => new UserData
+        {
+            Id = data.Id,
+            FirstName = data.FirstName,
+            LastName = data.LastName,
+            Fields = data.Fields
+        };
+    public static User MapTo(UserData data)
+        => new User
+        {
+            FirstName = data.FirstName,
+            LastName = data.LastName,
+            Fields = data.Fields
+        };
+
+    public static void SetTo(UserData to, User from)
+    {
+        to.Id = from.Id;
+        to.FirstName = from.FirstName;
+        to.LastName = from.LastName;
+        to.Fields = from.Fields;
+    }
+    public static void SetTo(User to, UserData from)
+    {
+        to.FirstName = from.FirstName;
+        to.LastName = from.LastName;
+        to.Fields = from.Fields;
+    }
+
     public async Task<bool> CreateUserByCurrentAsync(string firstName, string? lastName, CancellationToken cancellationToken)
     {
         if (current.AuthID is not int authId) return false;
@@ -27,12 +57,7 @@ public class UserRepository(ICurrentUser current, IContext context) : IUserRepos
     public async Task<UserData?> GetUserInfoByIdAsync(int userId, CancellationToken cancellationToken)
     {
         User? user = await context.Users.FindAsync([userId], cancellationToken);
-        return user is null ? null : new UserData
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Fields = user.Fields
-        };
+        return user is null ? null : MapTo(user);
     }
     public async Task<UserData?> GetUserInfoByCurrentAsync(CancellationToken cancellationToken)
         => current.UserID is int userId
@@ -44,9 +69,7 @@ public class UserRepository(ICurrentUser current, IContext context) : IUserRepos
         await using var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken);
         User? user = await context.Users.FindAsync([userId], cancellationToken);
         if (user is null) return false;
-        user.FirstName = userData.FirstName;
-        user.LastName = userData.LastName;
-        user.Fields = userData.Fields;
+        SetTo(user, userData);
         await context.DbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return true;
