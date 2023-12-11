@@ -33,6 +33,18 @@ public class UserController(IMediator mediator) : ControllerBase
             ? Ok(new SuccessResponse<UserData> { Response = userData })
             : NotFound(new ErrorResponse { Error = "user not found" });
 
+    [HttpGet("{id}/events")]
+    [Authorize(Policy = "user")]
+    [ProducesResponseType(typeof(SuccessResponse<IEnumerable<EventData>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAsync(
+        [FromRoute(Name = "id")] int id,
+        [FromQuery(Name = "type")] UserTypeQuery type,
+        CancellationToken cancellationToken)
+        => Ok(new SuccessResponse<IEnumerable<EventData>>
+        {
+            Response = await mediator.Send(new GetEventsByUserIdQuery(id, type), cancellationToken)
+        });
+
     [HttpPost("modify")]
     [Authorize(Policy = "user")]
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
@@ -41,6 +53,6 @@ public class UserController(IMediator mediator) : ControllerBase
         [FromBody] UserData userData,
         CancellationToken cancellationToken)
         => await mediator.Send(new ModifyUserByCurrentQuery(userData), cancellationToken)
-            ? Ok(new SuccessResponse { })
-            : Unauthorized(new ErrorResponse { Error = "user not found" });
+                ? Ok(new SuccessResponse { })
+                : Unauthorized(new ErrorResponse { Error = "user not found" });
 }
