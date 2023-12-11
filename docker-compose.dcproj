@@ -5,7 +5,7 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <DockerPublishLocally>False</DockerPublishLocally>
     <ProjectGuid>116b036a-cbca-4bfa-814b-d07ad25cec2a</ProjectGuid>
-    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
+    <DockerLaunchAction>None</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>taskcbt.webapp</DockerServiceName>
   </PropertyGroup>
