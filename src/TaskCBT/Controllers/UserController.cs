@@ -22,4 +22,25 @@ public class UserController(IMediator mediator) : ControllerBase
             ? Ok(new SuccessResponse<AuthData> { Response = authData })
             : Conflict(new ErrorResponse { Error = "user already exist" });
 
+    [HttpGet("{id}")]
+    [Authorize(Policy = "user")]
+    [ProducesResponseType(typeof(SuccessResponse<UserData>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAsync(
+        [FromRoute(Name = "id")] int id,
+        CancellationToken cancellationToken)
+        => await mediator.Send(new GetUserByIdQuery(id), cancellationToken) is UserData userData
+            ? Ok(new SuccessResponse<UserData> { Response = userData })
+            : NotFound(new ErrorResponse { Error = "user not found" });
+
+    [HttpGet("modify")]
+    [Authorize(Policy = "user")]
+    [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] UserData userData,
+        CancellationToken cancellationToken)
+        => await mediator.Send(new ModifyUserByCurrentQuery(userData), cancellationToken)
+            ? Ok(new SuccessResponse { })
+            : Unauthorized(new ErrorResponse { Error = "user not found" });
 }
