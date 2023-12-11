@@ -60,7 +60,10 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetSubscribersAsync(
         [FromRoute(Name = "id")] int id,
         CancellationToken cancellationToken)
-        => Ok(new SuccessResponse<IEnumerable<UserData>> { Response = await mediator.Send(new GetEventSubscribersByIdQuery(id), cancellationToken) });
+        => Ok(new SuccessResponse<IEnumerable<UserData>>
+        {
+            Response = await mediator.Send(new GetEventSubscribersByIdQuery(id), cancellationToken)
+        });
 
     [HttpGet("{id}/owner")]
     [Authorize(Policy = "user")]
