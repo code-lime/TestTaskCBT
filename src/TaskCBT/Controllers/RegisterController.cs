@@ -9,27 +9,33 @@ namespace TaskCBT.Controllers;
 [Route("register")]
 public class RegisterController(IMediator mediator) : ControllerBase
 {
-    [HttpGet("email")]
     [AllowAnonymous]
-    public async Task<Response> EmailLoginAsync(
+    [HttpGet("email")]
+    [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> EmailLoginAsync(
         [FromQuery(Name = "email")] string email,
         [FromQuery(Name = "password")] string password,
         CancellationToken cancellationToken)
         => await mediator.Send(new RegisterByEmailQuery(email, password), cancellationToken)
-            ? new SuccessResponse { }
-            : new ErrorResponse { Error = "user already exist" };
+            ? Ok(new SuccessResponse { })
+            : Conflict(new ErrorResponse { Error = "user already exist" });
 
     [HttpGet("confirm")]
     [Authorize(Policy = "confirm")]
-    public async Task<Response> ConfirmAsync(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ConfirmAsync(CancellationToken cancellationToken)
         => await mediator.Send(new RegisterConfirmQuery(true), cancellationToken)
-            ? new SuccessResponse { }
-            : new ErrorResponse { Error = "auth not found" };
+            ? Ok(new SuccessResponse { })
+            : Unauthorized(new ErrorResponse { Error = "auth not found" });
 
     [HttpGet("cancel")]
     [Authorize(Policy = "confirm")]
-    public async Task<Response> CancelAsync(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CancelAsync(CancellationToken cancellationToken)
         => await mediator.Send(new RegisterConfirmQuery(false), cancellationToken)
-            ? new SuccessResponse { }
-            : new ErrorResponse { Error = "auth not found" };
+            ? Ok(new SuccessResponse { })
+            : Unauthorized(new ErrorResponse { Error = "auth not found" });
 }

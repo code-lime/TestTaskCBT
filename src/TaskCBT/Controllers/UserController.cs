@@ -12,11 +12,14 @@ public class UserController(IMediator mediator) : ControllerBase
 {
     [HttpGet("create")]
     [Authorize(Policy = "create")]
-    public async Task<Response> CreateAsync(
+    [ProducesResponseType(typeof(SuccessResponse<AuthData>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateAsync(
         [FromQuery(Name = "firstName")] string firstName,
         CancellationToken cancellationToken,
         [FromQuery(Name = "lastName")] string? lastName = null)
-        => await mediator.Send(new CreateUserQuery(firstName, lastName), cancellationToken) is AuthData authData
-            ? new SuccessResponse<AuthData> { Response = authData }
-            : new ErrorResponse { Error = "auth error or user exist" };
+        => await mediator.Send(new CreateUserByCurrentQuery(firstName, lastName), cancellationToken) is AuthData authData
+            ? Ok(new SuccessResponse<AuthData> { Response = authData })
+            : Conflict(new ErrorResponse { Error = "user already exist" });
+
 }
