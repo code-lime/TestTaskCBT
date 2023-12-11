@@ -37,7 +37,7 @@ public class UserController(IMediator mediator) : ControllerBase
     [Authorize(Policy = "user")]
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> CreateAsync(
+    public async Task<IActionResult> ModifyAsync(
         [FromBody] UserData userData,
         CancellationToken cancellationToken)
         => await mediator.Send(new ModifyUserByCurrentQuery(userData), cancellationToken)
