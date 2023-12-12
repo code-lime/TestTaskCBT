@@ -1,0 +1,382 @@
+﻿@page
+@using TaskCBT.WebApp
+
+<meta charset="utf-8">
+
+<link rel="stylesheet" type="text/css" href="~/css/table.css">
+<script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
+<script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
+<script type="text/javascript">
+    let api = '@Variable.Raw.UrlApi';
+
+    let params = new URLSearchParams(window.location.search);
+    let eventId = params.get('id');
+    let createActive = false;
+
+    async function reloadEventsInfo() {
+        let user = await preloadUser(api);
+        if (user === undefined) return;
+
+        let elements = {
+            preload: document.getElementById('preload'),
+            list: document.getElementById('list'),
+            context: document.getElementById('context'),
+
+            create: {
+                params: document.getElementById('create.params'),
+            },
+
+            event: {
+                params: document.getElementById('event.params'),
+                fields: document.getElementById('event.fields'),
+
+                owner: document.getElementById('event.owner'),
+                subscribers: document.getElementById('event.subscribers'),
+                edit: document.getElementById('event.edit'),
+                join: document.getElementById('event.join'),
+                leave: document.getElementById('event.leave'),
+            },
+            events: document.getElementById('events'),
+        };
+
+        let messages = ["preload", "create", "not_found", "list", "context"];
+        function setMessage(message) {
+            for (let messageKey of messages)
+                document.getElementById(messageKey).hidden = messageKey !== message;
+        }
+
+        if (createActive) {
+            setMessage('create');
+            createParamsTable(elements.create.params, {
+                'Название': '',
+                'Тип': '',
+                'Дата и время проведения': {
+                    type: 'datetime-local',
+                    value: ''
+                },
+                '?Максимальное кол. подписчиков': {
+                    type: 'number',
+                    value: ''
+                }
+            }, function (params) {
+                setMessage('preload');
+                let eventClone = {
+                    fields: {}
+                };
+                eventClone.title = params['Название'];
+                eventClone.type = params['Тип'];
+                eventClone.time = params['Дата и время проведения'];
+                eventClone.subscribersLimit = params['?Максимальное кол. подписчиков'].trim();
+                if (eventClone.subscribersLimit.length === 0) {
+                    eventClone.subscribersLimit = null;
+                }
+                fetch(`${api}/events/create`, {
+                    body: JSON.stringify(eventClone),
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    jwt: 'local'
+                }).then(e => {
+                    if (e.status !== 200) {
+                        alert('Ошибка создания!');
+                        setMessage('create');
+                        return;
+                    }
+                    e.json().then(json => {
+                        if (json.status !== 'success') {
+                            alert('Ошибка создания!');
+                            setMessage('create');
+                            return;
+                        }
+                        window.location = `/events?id=${json.response}`;
+                    })
+                });
+            }, {
+                buttonName: 'Создать'
+            });
+        }
+        else if (eventId === null) {
+            fetch(`${api}/events`, { jwt: 'local' }).then(e => {
+                if (e.status !== 200) return;
+                e.json().then(json => {
+                    if (json.status !== 'success') return;
+                    let data = [];
+                    for (let eventData of json.response) {
+                        data.push({
+                            id: eventData.id,
+                            show: [
+                                eventData.title,
+                                eventData.type,
+                                eventData.time,
+                                eventData.subscribersLimit === null ? '∞' : eventData.subscribersLimit,
+                            ]
+                        })
+                    }
+                    createHrefTable(elements.events, data, id => {
+                        window.location = `/events?id=${id}`;
+                    });
+                    setMessage('list');
+                })
+            })
+        } else {
+            fetch(`${api}/events/${eventId}`, { jwt: 'local' }).then(e => {
+                if (e.status !== 200) {
+                    setMessage('not_found');
+                    return;
+                }
+                e.json().then(json => {
+                    if (json.status !== 'success') {
+                        setMessage('not_found');
+                        return;
+                    }
+
+                    let event = json.response;
+
+                    fetch(`${api}/events/${event.id}/owner`, { jwt: 'local' }).then(async function(e) {
+                        if (e.status !== 200) {
+                            createFieldsTable(elements.event.owner, {
+                                'Ошибка': 'Пользователь не найден'
+                            });
+                            elements.event.owner.hidden = false;
+                            return -1;
+                        }
+                        let json = await e.json();
+                        if (json.status !== 'success') {
+                            createFieldsTable(elements.event.owner, {
+                                'Ошибка': 'Пользователь не найден'
+                            });
+                            elements.event.owner.hidden = false;
+                            return -1;
+                        }
+                        let response = json.response;
+                        createHrefTable(elements.event.owner, [
+                            {
+                                id: 0,
+                                show: [ response.firstName, response.lastName ]
+                            }
+                        ], false);
+                        elements.event.owner.hidden = false;
+                        return response.id;
+                    }).then(ownerId => {
+                        createParamsTable(elements.event.params, {
+                            'Название': event.title,
+                            'Тип': event.type,
+                            'Дата и время проведения': {
+                                type: 'datetime-local',
+                                value: event.time
+                            },
+                            '?Максимальное кол. подписчиков': {
+                                type: 'number',
+                                value: event.subscribersLimit === null ? '' : event.subscribersLimit
+                            }
+                        }, ownerId !== user.id ? false : function (params) {
+                            let eventClone = deepClone(event);
+                            eventClone.title = params['Название'];
+                            eventClone.type = params['Тип'];
+                            eventClone.time = params['Дата и время проведения'];
+                            eventClone.subscribersLimit = params['?Максимальное кол. подписчиков'].trim();
+                            if (eventClone.subscribersLimit.length === 0) {
+                                eventClone.subscribersLimit = null;
+                            }
+                            fetch(`${api}/events/modify`, {
+                                body: JSON.stringify(eventClone),
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                jwt: 'local'
+                            }).then(response => {
+                                if (response.status !== 200) {
+                                    alert('Ошибка изменения!');
+                                    return;
+                                }
+                                reloadEventsInfo();
+                            });
+                        });
+                        createFieldsTable(elements.event.fields, event.fields, ownerId !== user.id ? false : function (fields) {
+                            let eventClone = deepClone(event);
+                            eventClone.fields = fields;
+                            fetch(`${api}/events/modify`, {
+                                body: JSON.stringify(eventClone),
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                jwt: 'local'
+                            }).then(response => {
+                                if (response.status !== 200) {
+                                    alert('Ошибка изменения!');
+                                    return;
+                                }
+                                reloadEventsInfo();
+                            });
+                        });
+
+                        setMessage('context');
+                        fetch(`${api}/events/${event.id}/subscribers`, { jwt: 'local' }).then(e => {
+                            if (e.status !== 200) return;
+                            e.json().then(json => {
+                                if (json.status !== 'success') return;
+                                let response = json.response;
+                                let subs = []
+                                let exist = false;
+                                for (let sub of response) {
+                                    subs.push({
+                                        id: sub.id,
+                                        show: [
+                                            sub.firstName,
+                                            sub.lastName
+                                        ]
+                                    });
+                                    if (sub.id === user.id) {
+                                        exist = true;
+                                    }
+                                }
+
+                                elements.event.leave.hidden = !exist;
+                                elements.event.join.hidden = exist;
+
+                                createHrefTable(elements.event.subscribers, subs, false);
+                                elements.event.subscribers.hidden = false;
+                                return;
+                            })
+                        });
+                    });
+                });
+            })
+        }
+    }
+    function create() {
+        createActive = true;
+        reloadEventsInfo();
+    }
+    function join() {
+        fetch(`${api}/events/${eventId}/join`, {
+            method: 'POST',
+            jwt: 'local'
+        }).then(e => {
+            if (e.status !== 200) {
+                alert('Ошибка! Лимит подписчиков!');
+                return;
+            }
+            e.json().then(json => {
+                if (json.status !== 'success') {
+                    alert('Ошибка! Лимит подписчиков!');
+                    return;
+                }
+                reloadEventsInfo();
+            });
+        });
+    }
+    function leave() {
+        fetch(`${api}/events/${eventId}/leave`, {
+            method: 'POST',
+            jwt: 'local'
+        }).then(e => {
+            if (e.status !== 200) return;
+            e.json().then(json => {
+                if (json.status !== 'success') return;
+                reloadEventsInfo();
+            });
+        });
+    }
+
+    window.addEventListener('load', function () {
+        reloadEventsInfo();
+    });
+</script>
+
+<h1 id="preload">Загрузка...</h1>
+<div id="create" hidden>
+    <h1>Создание мероприятия:</h1>
+    <h2>Данные:</h2>
+    <table id="create.params">
+        <tr>
+            <td>Поле #1:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+        <tr>
+            <td>Поле #2:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+    </table>
+</div>
+<div id="not_found" hidden>
+    <h1>Ошибка! Мероприятие не найдено!</h1>
+    <br />
+    <input type="button" value="Посмотреть весь список мероприятий" onclick="location.href='/events'">
+    <br />
+    <input type="button" value="Перейти к аккаунту" onclick="location.href='/'">
+</div>
+<div id="list" hidden>
+    <input type="button" value="Создать меропреятие" onclick="create()">
+    <h2>Все мероприятия:</h2>
+    <table id="events">
+        <tr>
+            <td>Мероприятие #1:</td>
+            <td>...</td>
+            <td>href</td>
+        </tr>
+    </table>
+    <br />
+    <input type="button" value="Перейти к аккаунту" onclick="location.href='/'">
+</div>
+<div id="context" hidden>
+    <h2>Данные:</h2>
+    <table id="event.params">
+        <tr>
+            <td>Поле #1:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+        <tr>
+            <td>Поле #2:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+    </table>
+    <h2>Информация:</h2>
+    <table id="event.fields">
+        <tr>
+            <td>Поле #1:</td>
+            <td>...</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>Поле #2:</td>
+            <td>...</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td>+</td>
+        </tr>
+    </table>
+    <h2>Создатель мероприятия:</h2>
+    <table id="event.owner" hidden>
+        <tr>
+            <td>Пользователь #1:</td>
+            <td>...</td>
+            <td>href</td>
+        </tr>
+    </table>
+    <h2>Подписчики данного мероприятия:</h2>
+    <table id="event.subscribers" hidden>
+        <tr>
+            <td>Пользователь #1:</td>
+            <td>...</td>
+            <td>href</td>
+        </tr>
+    </table>
+    <h2>Действия:</h2>
+    <input id="event.join" type="button" value="Подписатья" onclick="join()" hidden>
+    <input id="event.leave" type="button" value="Отписаться" onclick="leave()" hidden>
+    <br />
+    <input type="button" value="Посмотреть весь список мероприятий" onclick="location.href='/events'">
+    <br />
+    <input type="button" value="Перейти к аккаунту" onclick="location.href='/'">
+</div>

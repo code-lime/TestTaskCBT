@@ -1,6 +1,8 @@
 ﻿@page
 @using TaskCBT.WebApp
 
+<meta charset="utf-8">
+
 <link rel="stylesheet" type="text/css" href="~/css/table.css">
 <script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
 <script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
@@ -16,14 +18,18 @@
             context: document.getElementById('context'),
             params: document.getElementById('params'),
             fields: document.getElementById('fields'),
+            events: {
+                owner: document.getElementById('events.owner'),
+                subscriber: document.getElementById('events.subscriber'),
+            }
         };
 
         elements.preload.hidden = true;
         elements.context.hidden = false;
-        
+
         createParamsTable(elements.params, {
             'Имя': user.firstName,
-            '?Фамилия': user.lastName
+            '?Фамилия': user.lastName === null ? '' : user.lastName
         }, function (params) {
             let userClone = deepClone(user);
             userClone.firstName = params['Имя'];
@@ -61,13 +67,41 @@
                 reloadUserInfo();
             });
         });
+
+        function createTypedEventData(element, type) {
+            fetch(`${api}/users/0/events?type=${type}`, { jwt: 'local' }).then(e => {
+                if (e.status !== 200) return;
+                e.json().then(json => {
+                    if (json.status !== 'success') return;
+                    let data = [];
+                    for (let eventData of json.response) {
+                        data.push({
+                            id: eventData.id,
+                            show: [
+                                eventData.title,
+                                eventData.type,
+                                eventData.time,
+                                eventData.subscribersLimit,
+                            ]
+                        })
+                    }
+                    createHrefTable(element, data, id => {
+                        window.location = `/events?id=${id}`;
+                    });
+                    element.hidden = false;
+                })
+            })
+        }
+        createTypedEventData(elements.events.owner, 'owner');
+        createTypedEventData(elements.events.subscriber, 'subscriber');
     }
     function exit() {
         setCurrentJwt(null);
         window.location = '/auth'
     }
-
-    reloadUserInfo();
+    window.addEventListener('load', function () {
+        reloadUserInfo();
+    });
 </script>
 
 <h1 id="preload">Загрузка...</h1>
@@ -105,5 +139,22 @@
             <td>+</td>
         </tr>
     </table>
-    <input type="button" value="Посмотреть список ивентов" onclick="location.href='/events'">
+    <h2>Ваши мероприятия:</h2>
+    <table id="events.owner" hidden>
+        <tr>
+            <td>Мероприятие #1:</td>
+            <td>...</td>
+            <td>href</td>
+        </tr>
+    </table>
+    <h2>Мероприятия на которые вы подписаны:</h2>
+    <table id="events.subscriber" hidden>
+        <tr>
+            <td>Мероприятие #1:</td>
+            <td>...</td>
+            <td>href</td>
+        </tr>
+    </table>
+    <h2>Действия:</h2>
+    <input type="button" value="Посмотреть весь список мероприятий" onclick="location.href='/events'">
 </div>

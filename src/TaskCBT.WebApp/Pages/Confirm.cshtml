@@ -1,6 +1,8 @@
 ﻿@page
 @using TaskCBT.WebApp
 
+<meta charset="utf-8">
+
 <link rel="stylesheet" type="text/css" href="~/css/table.css">
 <script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
 <script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
@@ -13,40 +15,46 @@
     let status = params.get('status');
     let token = params.get('token');
 
-    let messages = ["preload", "not_query", "not_found", "confirm", "cancel"];
-    function setMessage(message) {
-        for (let messageKey of messages)
-            document.getElementById(messageKey).hidden = messageKey !== message;
-    }
+    function reloadConfirm() {
 
-    switch (status) {
-        case "confirm": {
-            fetch(`${api}/register/confirm`, { jwt: { accessToken: token } })
-                .then(e => {
-                    if (e.status != 200) {
-                        setMessage('not_found');
-                    } else {
-                        setMessage('confirm');
-                    }
-                })
-            break;
+        let messages = ["preload", "not_query", "not_found", "confirm", "cancel"];
+        function setMessage(message) {
+            for (let messageKey of messages)
+                document.getElementById(messageKey).hidden = messageKey !== message;
         }
-        case "cancel": {
-            fetch(`${api}/register/cancel`, { jwt: { accessToken: token } })
-                .then(e => {
-                    if (e.status != 200) {
-                        setMessage('not_found');
-                    } else {
-                        setMessage('cancel');
-                    }
-                })
-            break;
-        }
-        default: {
-            setMessage('not_query');
-            break;
+
+        switch (status) {
+            case "confirm": {
+                fetch(`${api}/register/confirm`, { jwt: { accessToken: token } })
+                    .then(e => {
+                        if (e.status != 200) {
+                            setMessage('not_found');
+                        } else {
+                            setMessage('confirm');
+                        }
+                    })
+                break;
+            }
+            case "cancel": {
+                fetch(`${api}/register/cancel`, { jwt: { accessToken: token } })
+                    .then(e => {
+                        if (e.status != 200) {
+                            setMessage('not_found');
+                        } else {
+                            setMessage('cancel');
+                        }
+                    })
+                break;
+            }
+            default: {
+                setMessage('not_query');
+                break;
+            }
         }
     }
+    window.addEventListener('load', function () {
+        reloadConfirm();
+    });
 </script>
 
 <h1 id="preload">Загрузка...</h1>

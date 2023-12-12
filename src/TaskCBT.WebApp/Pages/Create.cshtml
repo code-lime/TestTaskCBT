@@ -1,0 +1,86 @@
+﻿@page
+@using TaskCBT.WebApp
+
+<meta charset="utf-8">
+
+<link rel="stylesheet" type="text/css" href="~/css/table.css">
+<script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
+<script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
+<script type="text/javascript">
+    let api = '@Variable.Raw.UrlApi';
+
+    async function reloadUserInfo() {
+        if (!preloadCreate(api))
+            return;
+
+        let elements = {
+            preload: document.getElementById('preload'),
+            context: document.getElementById('context'),
+            params: document.getElementById('params'),
+        };
+
+        let messages = ["preload", "context", "created"];
+        function setMessage(message) {
+            for (let messageKey of messages)
+                document.getElementById(messageKey).hidden = messageKey !== message;
+        }
+
+        setMessage('context');
+        
+        createParamsTable(elements.params, {
+            'Имя': '',
+            '?Фамилия': ''
+        }, function (params) {
+            setMessage('preload');
+            let firstName = params['Имя'];
+            let lastName = params['?Фамилия'];
+            fetch(`${api}/users/create?firstName=${encodeURIComponent(firstName)}` + (lastName === null ? '' : `&lastName=${encodeURIComponent(lastName)}`), {
+                method: 'POST',
+                jwt: 'local'
+            }).then(response => {
+                if (response.status !== 200) {
+                    alert('Ошибка создания!');
+                    setMessage('context');
+                    return;
+                }
+                response.json().then(json => {
+                    if (json.status !== 'success') {
+                        alert('Ошибка создания!');
+                        setMessage('context');
+                        return;
+                    }
+                    setCurrentJwt(json.response);
+                    setMessage('created');
+                })
+            })
+        }, {
+            buttonName: 'Создать'
+        });
+    }
+
+    window.addEventListener('load', function () {
+        reloadUserInfo();
+    });
+</script>
+
+<h1 id="preload">Загрузка...</h1>
+<div id="context" hidden>
+    <h1>Создание аккаунта:</h1>
+    <h2>Данные:</h2>
+    <table id="params">
+        <tr>
+            <td>Поле #1:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+        <tr>
+            <td>Поле #2:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+    </table>
+</div>
+<div id="created" hidden>
+    <h1>Аккаунт успешно создан</h1>
+    <a href="/">Перейти к аккаунту</a>
+</div>
