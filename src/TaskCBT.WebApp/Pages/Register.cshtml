@@ -1,0 +1,31 @@
+﻿@page
+@using TaskCBT.WebApp
+
+<link rel="stylesheet" type="text/css" href="~/css/table.css">
+<script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
+<script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
+<script type="text/javascript">
+    let api = '@Variable.Raw.UrlApi';
+
+    function regEmail() {
+        let email = document.getElementById('email.email').value;
+        let password = document.getElementById('email.password').value;
+        fetch(`${api}/register/email?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`)
+            .then(e => {
+                if (e.status !== 200) {
+                    alert('Ошибка!');
+                } else {
+                    window.location = `/emailsend`;
+                }
+            })
+    }
+</script>
+
+<h1>Регистрация</h1>
+<h1>Создание аккаунта:</h1>
+<p>Email:</p>
+<input type="email" placeholder="example@gmгail.com" id="email.email">
+<input type="password" placeholder="Пароль" id="email.password">
+<input type="button" value="Запросить подтверждение почты" onclick="regEmail()">
+<br />
+<p>Есть аккаунт? <a href="/auth">Войти в аккаунт</a></p>

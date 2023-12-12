@@ -1,0 +1,35 @@
+﻿@page
+@using TaskCBT.WebApp
+
+<link rel="stylesheet" type="text/css" href="~/css/table.css">
+<script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
+<script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
+<script type="text/javascript">
+    let api = '@Variable.Raw.UrlApi';
+
+    function authEmail() {
+        let email = document.getElementById('email.email').value;
+        let password = document.getElementById('email.password').value;
+        fetch(`${api}/auth/email?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`)
+            .then(e => {
+                if (e.status !== 200) {
+                    alert('Ошибка авторизации!');
+                } else {
+                    e.json().then(json => {
+                        let response = json.response;
+                        setCurrentJwt(response);
+                        window.location = '/';
+                    })
+                }
+            })
+    }
+</script>
+
+<h1>Авторизация</h1>
+<h1>Пройдите авторизацию:</h1>
+<p>Email:</p>
+<input type="email" placeholder="example@gmail.com" id="email.email">
+<input type="password" placeholder="Пароль" id="email.password">
+<input type="button" value="Войти" onclick="authEmail()">
+<br />
+<p>Нету аккаунта? <a href="/register">Создать аккаунт</a></p>

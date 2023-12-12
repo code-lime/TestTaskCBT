@@ -1,27 +1,109 @@
 ﻿@page
 @using TaskCBT.WebApp
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <br />
-    <a href="/Any">ANY</a>
-    <a href="@Variable.Raw.UrlApi/test/ads">APAAI</a>
-</div>
-
-<script type="text/javascript" src="~/js/jwt.js"></script>
+<link rel="stylesheet" type="text/css" href="~/css/table.css">
+<script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
+<script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
 <script type="text/javascript">
-    (async function () {
-        console.log("BEGIN");
-        initFetchJwt("@Variable.Raw.UrlApi/auth/refresh");
-        console.log("INIT", getParsedCurrentJwt());
-        let response = await fetch("@Variable.Raw.UrlApi/email?email=demn2001@gmail.com&password=123444");
-        /*, {
-            jwt: 'local'
-        } */
-        console.log("Response: ", response);
-        let json = await response.json();
-        console.log("Response JSON body: ", json);
-    })();
+    let api = '@Variable.Raw.UrlApi';
+
+    async function reloadUserInfo() {
+        let user = await preloadUser(api);
+        if (user === undefined) return;
+
+        let elements = {
+            preload: document.getElementById('preload'),
+            context: document.getElementById('context'),
+            params: document.getElementById('params'),
+            fields: document.getElementById('fields'),
+        };
+
+        elements.preload.hidden = true;
+        elements.context.hidden = false;
+        
+        createParamsTable(elements.params, {
+            'Имя': user.firstName,
+            '?Фамилия': user.lastName
+        }, function (params) {
+            let userClone = deepClone(user);
+            userClone.firstName = params['Имя'];
+            userClone.lastName = params['?Фамилия'];
+            fetch(`${api}/users/modify`, {
+                body: JSON.stringify(userClone),
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                jwt: 'local'
+            }).then(response => {
+                if (response.status !== 200) {
+                    alert('Ошибка изменения!');
+                    return;
+                }
+                reloadUserInfo();
+            });
+        });
+        createFieldsTable(elements.fields, user.fields, function (fields) {
+            let userClone = deepClone(user);
+            userClone.fields = fields;
+            fetch(`${api}/users/modify`, {
+                body: JSON.stringify(userClone),
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                jwt: 'local'
+            }).then(response => {
+                if (response.status !== 200) {
+                    alert('Ошибка изменения!');
+                    return;
+                }
+                reloadUserInfo();
+            });
+        });
+    }
+    function exit() {
+        setCurrentJwt(null);
+        window.location = '/auth'
+    }
+
+    reloadUserInfo();
 </script>
 
+<h1 id="preload">Загрузка...</h1>
+<div id="context" hidden>
+    <h1>Вы авторизированы!</h1>
+    <input type="button" value="Выйти" onclick="exit()">
+    <h2>Данные:</h2>
+    <table id="params">
+        <tr>
+            <td>Поле #1:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+        <tr>
+            <td>Поле #2:</td>
+            <td>...</td>
+            <td>$</td>
+        </tr>
+    </table>
+    <h2>Информация:</h2>
+    <table id="fields">
+        <tr>
+            <td>Поле #1:</td>
+            <td>...</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>Поле #2:</td>
+            <td>...</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td>+</td>
+        </tr>
+    </table>
+    <input type="button" value="Посмотреть список ивентов" onclick="location.href='/events'">
+</div>
