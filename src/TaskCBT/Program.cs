@@ -1,4 +1,6 @@
 using Serilog;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using TaskCBT;
 using TaskCBT.Application;
 using TaskCBT.Infrastructure;
@@ -15,6 +17,7 @@ builder.Host.UseSerilog();
 builder.Services.AddSingleton(Log.Logger);
 
 builder.Services.AddControllers();
+builder.Services.ConfigureHttpJsonOptions(v => v.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower)));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(v => v.SupportNonNullableReferenceTypes());
