@@ -13,13 +13,13 @@ public class AuthController(IMediator mediator) : ControllerBase
     [AllowAnonymous]
     [HttpGet("refresh")]
     [ProducesResponseType(typeof(SuccessResponse<AuthData>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> RefreshTokenAsync(
         [FromQuery(Name = "refreshToken")] string refreshToken,
         CancellationToken cancellationToken)
         => await mediator.Send(new GetAuthByRefreshTokenQuery(refreshToken), cancellationToken) is AuthData authData
             ? Ok(new SuccessResponse<AuthData> { Response = authData })
-            : NotFound(new ErrorResponse { Error = "refresh not found" });
+            : Unauthorized(new ErrorResponse { Error = "refresh not found" });
 
     [AllowAnonymous]
     [HttpGet("email")]
