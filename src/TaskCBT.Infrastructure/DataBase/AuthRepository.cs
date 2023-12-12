@@ -138,7 +138,10 @@ public class AuthRepository(
             .Where(v => v.Id == authId && v.Status == AuthStatus.WaitConfirm)
             .FirstOrDefaultAsync(cancellationToken);
         if (auth is null) return false;
-        auth.Status = AuthStatus.Registry;
+
+        if (confirm) auth.Status = AuthStatus.Registry;
+        else context.Auths.Remove(auth);
+
         await context.DbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return true;
