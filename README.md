@@ -82,6 +82,7 @@ WEB приложение - планировщик мероприятий
    > MARIADB_DATABASE=... //Название базы данных
    > MARIADB_USERNAME=... //Пользователь базы данных
    > MARIADB_PASSWORD=... //Пароль от пользователя базы данных
+   > MARIADB_ROOT_PASSWORD=... //Пароль от root пользователя базы данных
    > MARIADB_PORT=... //Порт базы данных
    >
    > LOGGING_LEVEL=... //Уровни логирования (Verbose, Debug, Information, Warning, Error, Fatal) 
