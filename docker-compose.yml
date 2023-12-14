@@ -39,6 +39,11 @@ services:
       - Email__Password=${EMAIL_PASSWORD}
       - Email__ConfirmMessage__Subject=${EMAIL_CONFIRMMESSAGE_SUBJECT}
       - Email__ConfirmMessage__Body=${EMAIL_CONFIRMMESSAGE_BODY}
+      
+      - Phone__TwilioAccountSid=${TWILIO_ACCOUNT_SID}
+      - Phone__TwilioAuthToken=${TWILIO_AUTH_TOKEN}
+      - Phone__Phone=${TWILIO_PHONE}
+      - Phone__ConfirmMessage=${TWILIO_CONFIRMMESSAGE}
     ports:
       - ${API_PORT_HTTP}:8080
       - ${API_PORT_HTTPS}:8081
@@ -100,6 +105,10 @@ networks:
 # EMAIL_PASSWORD
 # EMAIL_CONFIRMMESSAGE_SUBJECT
 # EMAIL_CONFIRMMESSAGE_BODY
+# TWILIO_ACCOUNT_SID
+# TWILIO_AUTH_TOKEN
+# TWILIO_PHONE
+# TWILIO_CONFIRMMESSAGE
 # API_URL
 # API_PORT_HTTP
 # API_PORT_HTTPS
