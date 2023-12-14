@@ -6,6 +6,7 @@ using TaskCBT.Application.Common.Interfaces;
 using TaskCBT.Infrastructure.Common.Configs;
 using TaskCBT.Infrastructure.DataBase;
 using TaskCBT.Infrastructure.Services;
+using TaskCBT.Infrastructure.Services.Registry;
 
 namespace TaskCBT.Infrastructure;
 
