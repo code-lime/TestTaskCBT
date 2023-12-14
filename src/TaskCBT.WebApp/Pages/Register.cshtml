@@ -9,25 +9,38 @@
 <script type="text/javascript">
     let api = '@Variable.Raw.UrlApi';
 
-    function regEmail() {
-        let email = document.getElementById('email.email').value;
-        let password = document.getElementById('email.password').value;
-        fetch(`${api}/register/email?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`)
-            .then(e => {
-                if (e.status !== 200) {
-                    alert('Ошибка!');
-                } else {
-                    window.location = `/emailsend`;
-                }
-            })
+    function regIdentity() {
+        let identity = document.getElementById('identity.identity').value;
+        let password = document.getElementById('identity.password').value;
+        if (validateEmail(identity)) {
+            fetch(`${api}/register/email?email=${encodeURIComponent(identity)}&password=${encodeURIComponent(password)}`)
+                .then(e => {
+                    if (e.status !== 200) {
+                        alert('Ошибка!');
+                    } else {
+                        window.location = `/emailsend`;
+                    }
+                })
+        } else if (validatePhone(identity)) {
+            fetch(`${api}/register/phone?phone=${encodeURIComponent(identity)}&password=${encodeURIComponent(password)}`)
+                .then(e => {
+                    if (e.status !== 200) {
+                        alert('Ошибка!');
+                    } else {
+                        window.location = `/phonesend?phone=${encodeURIComponent(identity)}&password=${encodeURIComponent(password)}`;
+                    }
+                })
+        } else {
+            alert('Ошибка! Требуется указать корректную почту в формате example@gmail.com или телефон в формате +123456789');
+        }
     }
 </script>
 
 <h1>Регистрация</h1>
 <h1>Создание аккаунта:</h1>
-<p>Email:</p>
-<input type="email" placeholder="example@gmгail.com" id="email.email">
-<input type="password" placeholder="Пароль" id="email.password">
-<input type="button" value="Запросить подтверждение почты" onclick="regEmail()">
+<p>Email или Телефон:</p>
+<input type="text" placeholder="example@gmail.com or +123456789" id="identity.identity">
+<input type="password" placeholder="Пароль" id="identity.password">
+<input type="button" value="Запросить подтверждение" onclick="regIdentity()">
 <br />
 <p>Есть аккаунт? <a href="/auth">Войти в аккаунт</a></p>

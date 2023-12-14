@@ -1,0 +1,59 @@
+﻿@page
+@using TaskCBT.WebApp
+
+<meta charset="utf-8">
+
+<link rel="stylesheet" type="text/css" href="~/css/table.css">
+<script charset="utf-8" type="text/javascript" src="~/js/jwt.js"></script>
+<script charset="utf-8" type="text/javascript" src="~/js/main.js"></script>
+<script type="text/javascript">
+    let api = '@Variable.Raw.UrlApi';
+    //phonesend?phone=${encodeURIComponent(identity)}&password
+    let params = new URLSearchParams(window.location.search);
+    let phone = params.get('phone');
+    let password = params.get('password');
+
+    let messages = ["preload", "not_query", "confirm"];
+    function setMessage(message) {
+        for (let messageKey of messages)
+            document.getElementById(messageKey).hidden = messageKey !== message;
+    }
+
+    function reloadConfirm() {
+        if (phone === null || password === null) {
+            setMessage("not_query");
+            return;
+        }
+    }
+    function confirm() {
+        let code = document.getElementById('identity.code').value;
+        fetch(`${api}/register/phone/confirm?phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}&code=${encodeURIComponent(code)}`)
+            .then(e => {
+                if (e.status != 200) {
+                    alert('Код недействительный, или время регистрации вышло!');
+                } else {
+                    setMessage('confirm');
+                }
+            })
+    }
+    window.addEventListener('load', function () {
+        reloadConfirm();
+    });
+</script>
+
+<div id="preload">
+    <h1>На номер телефона был отправлен код подтверждения!</h1>
+    <p>Введите код:</p>
+    <input type="text" placeholder="123456" id="identity.code">
+    <input type="button" value="Проверить" onclick="confirm()">
+    <br />
+    <p>Есть аккаунт? <a href="/auth">Войти в аккаунт</a></p>
+</div>
+<div id="not_query" hidden>
+    <h1>Ошибка! Ссылка недействительна</h1>
+    <a href="/auth">Войти в аккаунт</a> | <a href="/register">Создать аккаунт</a>
+</div>
+<div id="confirm" hidden>
+    <h1>Регистрация прошла успешно</h1>
+    <a href="/auth">Войти в аккаунт</a>
+</div>
