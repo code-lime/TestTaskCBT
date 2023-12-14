@@ -35,6 +35,8 @@ public static class ConfigureServices
             .AddScoped<IJwtService, JwtService>()
             .AddScoped<IEmailService, EmailService>()
 
+            .AddScoped<IEmailRegistry, EmailRegistry>()
+
             .Configure<JwtConfig>(configuration.GetRequiredSection(JwtConfig.SectionKey))
             .Configure<EmailConfig>(configuration.GetRequiredSection(EmailConfig.SectionKey));
     }

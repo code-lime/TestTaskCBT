@@ -4,15 +4,15 @@ using TaskCBT.Application.Common.Interfaces;
 namespace TaskCBT.Application.Data.Queries;
 
 public record RegisterByEmailQuery(string Email, string Password) : IRequest<bool>;
-public record RegisterConfirmQuery(bool Confirm) : IRequest<bool>;
+public record ConfirmEmailByCurrentQuery(bool Confirm) : IRequest<bool>;
 
 public class RegisterQueryHandler(
-    IAuthRepository authRepository) :
+    IEmailRegistry emailRegistry) :
     IRequestHandler<RegisterByEmailQuery, bool>,
-    IRequestHandler<RegisterConfirmQuery, bool>
+    IRequestHandler<ConfirmEmailByCurrentQuery, bool>
 {
     public async Task<bool> Handle(RegisterByEmailQuery request, CancellationToken cancellationToken)
-        => await authRepository.CreateRegistryByEmailAsync(request.Email, request.Password, cancellationToken);
-    public async Task<bool> Handle(RegisterConfirmQuery request, CancellationToken cancellationToken) 
-        => await authRepository.ConfirmRegistryAsync(request.Confirm, cancellationToken);
+        => await emailRegistry.CreateRegistryAsync(request.Email, request.Password, cancellationToken);
+    public async Task<bool> Handle(ConfirmEmailByCurrentQuery request, CancellationToken cancellationToken)
+        => await emailRegistry.ConfirmRegistryByCurrentAsync(request.Confirm, cancellationToken); 
 }

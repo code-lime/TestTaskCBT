@@ -26,7 +26,7 @@ public class RegisterController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ConfirmAsync(CancellationToken cancellationToken)
-        => await mediator.Send(new RegisterConfirmQuery(true), cancellationToken)
+        => await mediator.Send(new ConfirmEmailByCurrentQuery(true), cancellationToken)
             ? Ok(new SuccessResponse { })
             : Unauthorized(new ErrorResponse { Error = "auth not found" });
 
@@ -35,7 +35,7 @@ public class RegisterController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(SuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CancelAsync(CancellationToken cancellationToken)
-        => await mediator.Send(new RegisterConfirmQuery(false), cancellationToken)
+        => await mediator.Send(new ConfirmEmailByCurrentQuery(false), cancellationToken)
             ? Ok(new SuccessResponse { })
             : Unauthorized(new ErrorResponse { Error = "auth not found" });
 }
