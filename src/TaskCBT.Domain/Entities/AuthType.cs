@@ -2,5 +2,6 @@
 
 public enum AuthType
 {
-    Email
+    Email,
+    Phone
 }
