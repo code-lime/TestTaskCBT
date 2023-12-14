@@ -99,6 +99,11 @@ WEB приложение - планировщик мероприятий
    > EMAIL_CONFIRMMESSAGE_SUBJECT=... //Тема письма с подтверждением
    > EMAIL_CONFIRMMESSAGE_BODY=... //Наполнение письма с подтверждением (форматирует {token} в токен подтверждения)
    >
+   > TWILIO_ACCOUNT_SID=... //SID от аккаунта Twilio
+   > TWILIO_AUTH_TOKEN=... //Token авторизации от аккаунта Twilio
+   > TWILIO_PHONE=... //Телефонный номер в Twilio
+   > TWILIO_CONFIRMMESSAGE=... //Наполнение sms с подтверждения (форматирует {code} в код подтверждения)
+   >
    > API_URL=... //Адрес API
    > API_PORT_HTTP=... //Порт http API
    > API_PORT_HTTPS=... //Порт https API

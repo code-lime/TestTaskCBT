@@ -1,22 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using TaskCBT.Application.Common.Interfaces;
 using TaskCBT.Application.Common.Models;
 using TaskCBT.Domain.Entities;
-using TaskCBT.Infrastructure.Common.Configs;
 
 namespace TaskCBT.Infrastructure.DataBase;
 
 public class AuthRepository(
     ICurrentUser current,
-    IEmailService emailService,
     ISecure secure,
     IContext context,
-    IJwtService jwtService,
-    IOptions<EmailConfig> config) : IAuthRepository
+    IJwtService jwtService) : IAuthRepository
 {
-    private readonly EmailConfig _config = config.Value;
     private static string GenerateToken(int length = 32)
     {
         byte[] bytes = new byte[length];
@@ -51,19 +46,11 @@ public class AuthRepository(
             RefreshToken = refreshToken
         };
     }
-    private string CreateConfirmToken(Auth auth)
-    {
-        IJwtBuilder builder = jwtService.GetJwtBuilder()
-            .AddRole("confirm")
-            .AddAuthId(auth.Id);
-        return builder.Build(TimeSpan.FromMinutes(5));
-    }
 
-    public async Task<AuthData?> GetAuthTokensByEmailAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task<AuthData?> GetAuthTokensByIdentityAsync(string identity, string password, CancellationToken cancellationToken)
     {
         Auth? auth = await context.Auths
-            .FirstOrDefaultAsync(v => v.Identity == email
-            && v.Type == AuthType.Email
+            .FirstOrDefaultAsync(v => v.Identity == identity
             && (v.Status == AuthStatus.Ok || v.Status == AuthStatus.Registry), 
             cancellationToken);
 
@@ -88,62 +75,4 @@ public class AuthRepository(
         && await context.Auths.FindAsync([authId], cancellationToken) is Auth auth
         ? await CreateAuthDataAsync(auth, cancellationToken)
         : null;
-    
-    public async Task<bool> CreateRegistryByEmailAsync(string email, string password, CancellationToken cancellationToken)
-    {
-        Auth? auth;
-        await using (var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken))
-        {
-            auth = await context.Auths
-                .Where(v => v.Type == AuthType.Email && v.Identity == email)
-                .FirstOrDefaultAsync(cancellationToken);
-            string salt = Guid.NewGuid().ToString();
-            if (auth is null)
-            {
-                auth = new Auth
-                {
-                    Identity = email,
-                    Type = AuthType.Email,
-                    Status = AuthStatus.WaitConfirm,
-                    Data = secure.GetSecure(password, salt),
-                    Salt = salt
-                };
-                await context.Auths.AddAsync(auth, cancellationToken);
-            }
-            else
-            {
-                if (auth.Status != AuthStatus.WaitConfirm)
-                    return false;
-                auth.Data = secure.GetSecure(password, salt);
-                auth.Salt = salt;
-            }
-            await context.DbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-        }
-
-        Dictionary<string, string> bodyArgs = new Dictionary<string, string>
-        {
-            ["token"] = CreateConfirmToken(auth)
-        };
-        EmailMessage message = _config.ConfirmMessage;
-        await emailService.SendAsync(email, message.Subject, message.BodyWithArgs(bodyArgs), cancellationToken);
-        return true;
-    }
-
-    public async Task<bool> ConfirmRegistryAsync(bool confirm, CancellationToken cancellationToken)
-    {
-        if (current.AuthID is not int authId) return false;
-        using var transaction = await context.DbContext.Database.BeginTransactionAsync(cancellationToken);
-        Auth? auth = await context.Auths
-            .Where(v => v.Id == authId && v.Status == AuthStatus.WaitConfirm)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (auth is null) return false;
-
-        if (confirm) auth.Status = AuthStatus.Registry;
-        else context.Auths.Remove(auth);
-
-        await context.DbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        return true;
-    }
 }

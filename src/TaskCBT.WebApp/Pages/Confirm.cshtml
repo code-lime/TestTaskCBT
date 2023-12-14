@@ -16,7 +16,6 @@
     let token = params.get('token');
 
     function reloadConfirm() {
-
         let messages = ["preload", "not_query", "not_found", "confirm", "cancel"];
         function setMessage(message) {
             for (let messageKey of messages)
@@ -25,7 +24,7 @@
 
         switch (status) {
             case "confirm": {
-                fetch(`${api}/register/confirm`, { jwt: { accessToken: token } })
+                fetch(`${api}/register/email/confirm`, { jwt: { accessToken: token } })
                     .then(e => {
                         if (e.status != 200) {
                             setMessage('not_found');
@@ -36,7 +35,7 @@
                 break;
             }
             case "cancel": {
-                fetch(`${api}/register/cancel`, { jwt: { accessToken: token } })
+                fetch(`${api}/register/email/cancel`, { jwt: { accessToken: token } })
                     .then(e => {
                         if (e.status != 200) {
                             setMessage('not_found');

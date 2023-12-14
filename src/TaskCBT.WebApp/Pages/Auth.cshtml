@@ -9,10 +9,10 @@
 <script type="text/javascript">
     let api = '@Variable.Raw.UrlApi';
 
-    function authEmail() {
-        let email = document.getElementById('email.email').value;
-        let password = document.getElementById('email.password').value;
-        fetch(`${api}/auth/email?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`)
+    function authIdentity() {
+        let identity = document.getElementById('identity.identity').value;
+        let password = document.getElementById('identity.password').value;
+        fetch(`${api}/auth/identity?identity=${encodeURIComponent(identity)}&password=${encodeURIComponent(password)}`)
             .then(e => {
                 if (e.status !== 200) {
                     alert('Ошибка авторизации!');
@@ -29,9 +29,9 @@
 
 <h1>Авторизация</h1>
 <h1>Пройдите авторизацию:</h1>
-<p>Email:</p>
-<input type="email" placeholder="example@gmail.com" id="email.email">
-<input type="password" placeholder="Пароль" id="email.password">
-<input type="button" value="Войти" onclick="authEmail()">
+<p>Email или Телефон:</p>
+<input type="text" placeholder="example@gmail.com or +123456789" id="identity.identity">
+<input type="password" placeholder="Пароль" id="identity.password">
+<input type="button" value="Войти" onclick="authIdentity()">
 <br />
 <p>Нету аккаунта? <a href="/register">Создать аккаунт</a></p>

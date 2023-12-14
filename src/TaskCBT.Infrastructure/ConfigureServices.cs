@@ -6,6 +6,7 @@ using TaskCBT.Application.Common.Interfaces;
 using TaskCBT.Infrastructure.Common.Configs;
 using TaskCBT.Infrastructure.DataBase;
 using TaskCBT.Infrastructure.Services;
+using TaskCBT.Infrastructure.Services.Registry;
 
 namespace TaskCBT.Infrastructure;
 
@@ -32,10 +33,15 @@ public static class ConfigureServices
             .AddScoped<IAuthRepository, AuthRepository>()
             .AddScoped<IUserRepository, UserRepository>()
 
-            .AddScoped<IJwtService, JwtService>()
-            .AddScoped<IEmailService, EmailService>()
+            .AddSingleton<IJwtService, JwtService>()
+            .AddSingleton<IEmailService, EmailService>()
+            .AddSingleton<IPhoneService, PhoneService>()
+
+            .AddScoped<IEmailRegistry, EmailRegistry>()
+            .AddScoped<IPhoneRegistry, PhoneRegistry>()
 
             .Configure<JwtConfig>(configuration.GetRequiredSection(JwtConfig.SectionKey))
-            .Configure<EmailConfig>(configuration.GetRequiredSection(EmailConfig.SectionKey));
+            .Configure<EmailConfig>(configuration.GetRequiredSection(EmailConfig.SectionKey))
+            .Configure<PhoneConfig>(configuration.GetRequiredSection(PhoneConfig.SectionKey));
     }
 }
